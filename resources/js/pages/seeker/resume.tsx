@@ -2,6 +2,11 @@ import InputError from '@/components/input-error';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Transition } from '@headlessui/react';
+
+import { Head, Link, useForm } from '@inertiajs/react';
+
+import { Head, useForm } from '@inertiajs/react';
+
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 
@@ -70,7 +75,7 @@ export default function Resume({ resume }: ResumeProps) {
             return;
         }
 
-
+        post(route('seeker.resume.store'));
     };
 
     return (
@@ -79,23 +84,6 @@ export default function Resume({ resume }: ResumeProps) {
 
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 rounded-xl border p-6 md:min-h-min">
-                    <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
-                        <div>
-                            <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100">Build your resume</h1>
-                            <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-                                Complete the sections below, then preview or download your resume.
-                            </p>
-                        </div>
-
-                        {resume && (
-                            <Link
-                                href="/dashboard/resume/view"
-                                className="inline-flex items-center justify-center rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-700"
-                            >
-                                View resume
-                            </Link>
-                        )}
-                    </div>
 
                     <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
                         <div>
@@ -268,6 +256,170 @@ export default function Resume({ resume }: ResumeProps) {
                                         <InputError message={errors.college_school} className="mt-2" />
                                     </div>
 
+                                    <div>
+                                        <label htmlFor="college_year" className="text-heading mb-2.5 block text-sm font-medium">
+                                            Year
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="college_year"
+                                            value={data.college_year}
+                                            onChange={(e) => setData('college_year', e.target.value)}
+                                            className="rounded-base border-default-medium bg-neutral-secondary-medium text-heading placeholder:text-body focus:border-brand focus:ring-brand block w-full border px-3 py-2.5 text-sm shadow-xs"
+                                            placeholder="2026"
+                                        />
+                                        <InputError message={errors.college_year} className="mt-2" />
+
+
+                                    <div>
+                                        <label htmlFor="middle_name" className="text-heading mb-1.5 block text-sm font-medium">
+                                            Middle Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="middle_name"
+                                            value={data.middle_name}
+                                            onChange={(e) => setData('middle_name', e.target.value)}
+                                            className="rounded-base border-default-medium bg-neutral-secondary-medium text-heading placeholder:text-body focus:border-brand focus:ring-brand block w-full border px-3 py-2.5 text-sm shadow-xs"
+                                            placeholder="Michael"
+                                        />
+                                        <InputError message={errors.middle_name} className="mt-2" />
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor="last_name" className="text-heading mb-1.5 block text-sm font-medium">
+                                            Last Name <span className="text-red-600">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="last_name"
+                                            value={data.last_name}
+                                            onChange={(e) => setData('last_name', e.target.value)}
+                                            className="rounded-base border-default-medium bg-neutral-secondary-medium text-heading placeholder:text-body focus:border-brand focus:ring-brand block w-full border px-3 py-2.5 text-sm shadow-xs"
+                                            placeholder="Doe"
+                                            required
+                                        />
+                                        <InputError message={errors.last_name} className="mt-2" />
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor="mobile_1" className="text-heading mb-1.5 block text-sm font-medium">
+                                            Mobile No. (1)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="mobile_1"
+                                            value={data.mobile_1}
+                                            onChange={(e) => setData('mobile_1', e.target.value)}
+                                            className="rounded-base border-default-medium bg-neutral-secondary-medium text-heading placeholder:text-body focus:border-brand focus:ring-brand block w-full border px-3 py-2.5 text-sm shadow-xs"
+                                            placeholder="123-456-7890"
+                                        />
+                                        <InputError message={errors.mobile_1} className="mt-2" />
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor="mobile_2" className="text-heading mb-1.5 block text-sm font-medium">
+                                            Mobile No. (2)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="mobile_2"
+                                            value={data.mobile_2}
+                                            onChange={(e) => setData('mobile_2', e.target.value)}
+                                            className="rounded-base border-default-medium bg-neutral-secondary-medium text-heading placeholder:text-body focus:border-brand focus:ring-brand block w-full border px-3 py-2.5 text-sm shadow-xs"
+                                            placeholder="123-456-7890"
+                                        />
+                                        <InputError message={errors.mobile_2} className="mt-2" />
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor="email" className="text-heading mb-1.5 block text-sm font-medium">
+                                            Email Address <span className="text-red-600">*</span>
+                                        </label>
+                                        <input
+                                            type="email"
+                                            id="email"
+                                            value={data.email}
+                                            onChange={(e) => setData('email', e.target.value)}
+                                            className="rounded-base border-default-medium bg-neutral-secondary-medium text-heading placeholder:text-body focus:border-brand focus:ring-brand block w-full border px-3 py-2.5 text-sm shadow-xs"
+                                            placeholder="john@example.com"
+                                            required
+                                        />
+                                        <InputError message={errors.email} className="mt-2" />
+                                    </div>
+
+                                    <div className="md:col-span-3">
+                                        <label htmlFor="current_address" className="text-heading mb-1.5 block text-sm font-medium">
+                                            Current Address
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="current_address"
+                                            value={data.current_address}
+                                            onChange={(e) => setData('current_address', e.target.value)}
+                                            className="rounded-base border-default-medium bg-neutral-secondary-medium text-heading placeholder:text-body focus:border-brand focus:ring-brand block w-full border px-3 py-2.5 text-sm shadow-xs"
+                                            placeholder="Street, City, State"
+                                        />
+                                        <InputError message={errors.current_address} className="mt-2" />
+
+                                    </div>
+                                </>
+                            )}
+
+
+                            {currentStep === 2 && (
+                                <>
+                                    <div>
+                                        <label htmlFor="college_school" className="text-heading mb-2.5 block text-sm font-medium">
+                                            College School
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="college_school"
+                                            value={data.college_school}
+                                            onChange={(e) => setData('college_school', e.target.value)}
+                                            className="rounded-base border-default-medium bg-neutral-secondary-medium text-heading placeholder:text-body focus:border-brand focus:ring-brand block w-full border px-3 py-2.5 text-sm shadow-xs"
+                                            placeholder="College or university"
+                                        />
+                                        <InputError message={errors.college_school} className="mt-2" />
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor="college_year" className="text-heading mb-2.5 block text-sm font-medium">
+                                            Year
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="college_year"
+                                            value={data.college_year}
+                                            onChange={(e) => setData('college_year', e.target.value)}
+                                            className="rounded-base border-default-medium bg-neutral-secondary-medium text-heading placeholder:text-body focus:border-brand focus:ring-brand block w-full border px-3 py-2.5 text-sm shadow-xs"
+                                            placeholder="2026"
+                                        />
+                                        <InputError message={errors.college_year} className="mt-2" />
+                                    </div>
+                                </>
+                            )}
+
+
+                            {currentStep === 3 && (
+                                <>
+                                    <div>
+                                        <label htmlFor="position" className="text-heading mb-2.5 block text-sm font-medium">
+                                            Position
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="position"
+                                            value={data.position}
+                                            onChange={(e) => setData('position', e.target.value)}
+                                            className="rounded-base border-default-medium bg-neutral-secondary-medium text-heading placeholder:text-body focus:border-brand focus:ring-brand block w-full border px-3 py-2.5 text-sm shadow-xs"
+                                            placeholder="Software Engineer"
+                                        />
+                                        <InputError message={errors.position} className="mt-2" />
+                                    </div>
+
+                                    <div>
                                         <label htmlFor="company" className="text-heading mb-2.5 block text-sm font-medium">
                                             Company
                                         </label>
