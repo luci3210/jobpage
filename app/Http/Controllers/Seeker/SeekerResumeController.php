@@ -3,20 +3,24 @@
 namespace App\Http\Controllers\Seeker;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Seeker\StoreResumeRequest;
+use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class SeekerResumeController extends Controller
 {
-    public function index()
+    public function index(): Response
     {
-        return inertia('seeker/resume');
-        // $user = auth()->user();
-        // $profile = $user->seekerProfile;
+        return Inertia::render('seeker/resume', [
+            'resume' => auth()->user()->resume,
+        ]);
+    }
 
-        // return inertia('Seeker/Resume', [
-        //     'profile' => $profile,
-        // ]);
+    public function store(StoreResumeRequest $request): RedirectResponse
+    {
+        $request->user()->resume()->updateOrCreate([], $request->validated());
+
+        return back()->with('success', 'Resume saved successfully.');
     }
 }
