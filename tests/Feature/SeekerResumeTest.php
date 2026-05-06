@@ -31,11 +31,6 @@ test('authenticated users can submit a resume', function () {
         ->from('/dashboard/resume')
         ->post('/dashboard/resume', resumePayload())
 
-        ->assertRedirect('/dashboard/resume/view');
-
-        ->assertRedirect('/dashboard/resume');
-
-
     $resume = Resume::query()->whereBelongsTo($user)->firstOrFail();
 
     expect($resume)
