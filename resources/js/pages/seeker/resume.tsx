@@ -2,7 +2,6 @@ import InputError from '@/components/input-error';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Transition } from '@headlessui/react';
-import { Head, Link, useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 
@@ -71,7 +70,7 @@ export default function Resume({ resume }: ResumeProps) {
             return;
         }
 
-        post('/dashboard/resume');
+
     };
 
     return (
@@ -97,6 +96,25 @@ export default function Resume({ resume }: ResumeProps) {
                             </Link>
                         )}
                     </div>
+
+                    <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
+                        <div>
+                            <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100">Build your resume</h1>
+                            <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+                                Complete the sections below, then preview or download your resume.
+                            </p>
+                        </div>
+
+                        {resume && (
+                            <Link
+                                href={route('seeker.resume.show')}
+                                className="inline-flex items-center justify-center rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-700"
+                            >
+                                View resume
+                            </Link>
+                        )}
+                    </div>
+
 
                     {/* Progress Stepper */}
                     <div className="relative mb-10 h-1 w-full rounded bg-gray-300">
@@ -137,6 +155,7 @@ export default function Resume({ resume }: ResumeProps) {
                                         />
                                         <InputError message={errors.first_name} className="mt-2" />
                                     </div>
+
 
                                     <div>
                                         <label htmlFor="middle_name" className="text-heading mb-1.5 block text-sm font-medium">
@@ -249,41 +268,6 @@ export default function Resume({ resume }: ResumeProps) {
                                         <InputError message={errors.college_school} className="mt-2" />
                                     </div>
 
-                                    <div>
-                                        <label htmlFor="college_year" className="text-heading mb-2.5 block text-sm font-medium">
-                                            Year
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="college_year"
-                                            value={data.college_year}
-                                            onChange={(e) => setData('college_year', e.target.value)}
-                                            className="rounded-base border-default-medium bg-neutral-secondary-medium text-heading placeholder:text-body focus:border-brand focus:ring-brand block w-full border px-3 py-2.5 text-sm shadow-xs"
-                                            placeholder="2026"
-                                        />
-                                        <InputError message={errors.college_year} className="mt-2" />
-                                    </div>
-                                </>
-                            )}
-
-                            {currentStep === 3 && (
-                                <>
-                                    <div>
-                                        <label htmlFor="position" className="text-heading mb-2.5 block text-sm font-medium">
-                                            Position
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="position"
-                                            value={data.position}
-                                            onChange={(e) => setData('position', e.target.value)}
-                                            className="rounded-base border-default-medium bg-neutral-secondary-medium text-heading placeholder:text-body focus:border-brand focus:ring-brand block w-full border px-3 py-2.5 text-sm shadow-xs"
-                                            placeholder="Software Engineer"
-                                        />
-                                        <InputError message={errors.position} className="mt-2" />
-                                    </div>
-
-                                    <div>
                                         <label htmlFor="company" className="text-heading mb-2.5 block text-sm font-medium">
                                             Company
                                         </label>
