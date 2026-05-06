@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, FormEventHandler } from 'react';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem } from '@/types';  
 import { Head, useForm } from '@inertiajs/react';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 
@@ -11,20 +11,38 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Resume() {
-const { data, setData, post, processing, errors } = useForm({
-    first_name: '',
-    middle_name: '',
-    last_name: '',
-    mobile_1: '',
-    mobile_2: '',
-    email: '',
-    current_address: '',
-    college_school: '',
-    college_year: '',
-    position: '',
-    company: '',
-});
+type ResumeForm = {
+    first_name: string;
+    middle_name: string;
+    last_name: string;
+    mobile_1: string;
+    mobile_2: string;
+    email: string;
+    current_address: string;
+    college_school: string;
+    college_year: string;
+    position: string;
+    company: string;
+};
+
+type ResumeProps = {
+    resume?: Partial<ResumeForm> | null;
+};
+
+export default function Resume({ resume }: ResumeProps) {
+    const { data, setData, post, processing, errors, recentlySuccessful } = useForm<ResumeForm>({
+        first_name: resume?.first_name ?? '',
+        middle_name: resume?.middle_name ?? '',
+        last_name: resume?.last_name ?? '',
+        mobile_1: resume?.mobile_1 ?? '',
+        mobile_2: resume?.mobile_2 ?? '',
+        email: resume?.email ?? '',
+        current_address: resume?.current_address ?? '',
+        college_school: resume?.college_school ?? '',
+        college_year: resume?.college_year ?? '',
+        position: resume?.position ?? '',
+        company: resume?.company ?? '',
+    });
 
     const [currentStep, setCurrentStep] = useState(1);
     const totalSteps = 3;
@@ -43,14 +61,14 @@ const { data, setData, post, processing, errors } = useForm({
         }
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
         e.preventDefault();
 
         if (currentStep < totalSteps) {
             nextStep();
-        } else {
-            alert('Form submitted!');
+            return;
         }
+        post(route('seeker.resume.store'));
     };
 
     return (
