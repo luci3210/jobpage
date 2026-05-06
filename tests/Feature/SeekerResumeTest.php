@@ -30,7 +30,11 @@ test('authenticated users can submit a resume', function () {
     $this->actingAs($user)
         ->from('/dashboard/resume')
         ->post('/dashboard/resume', resumePayload())
+
+        ->assertRedirect('/dashboard/resume/view');
+
         ->assertRedirect('/dashboard/resume');
+
 
     $resume = Resume::query()->whereBelongsTo($user)->firstOrFail();
 
@@ -68,3 +72,19 @@ test('first name last name and email are required to submit a resume', function 
         ->assertRedirect('/dashboard/resume')
         ->assertSessionHasErrors(['first_name', 'last_name', 'email']);
 });
+
+
+test('authenticated users can view their resume preview', function () {
+    $user = User::factory()->create();
+
+    $user->resume()->create(resumePayload());
+
+    $this->actingAs($user)
+        ->get('/dashboard/resume/view')
+        ->assertOk();
+});
+
+test('guests are redirected from the resume preview page', function () {
+    $this->get('/dashboard/resume/view')->assertRedirect('/login');
+});
+
