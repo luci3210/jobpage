@@ -1,7 +1,8 @@
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
-import { Download, FilePenLine } from 'lucide-react';
+import { type BreadcrumbItem, type SharedData } from '@/types';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { Download, FileText, Mail, MapPin, Phone, Printer, SquarePen } from 'lucide-react';
 import { type ReactNode } from 'react';
 
 type Resume = {
@@ -16,6 +17,7 @@ type Resume = {
     college_year: string | null;
     position: string | null;
     company: string | null;
+    updated_at?: string | null;
 };
 
 type ResumeViewProps = {
@@ -45,6 +47,34 @@ function hasValue(value?: string | null): value is string {
     return Boolean(value && value.trim() !== '');
 }
 
+function initials(name: string): string {
+    return name
+        .split(' ')
+        .filter(Boolean)
+        .map((part) => part[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase();
+}
+
+function formatUpdatedAt(value?: string | null): string {
+    if (!value) {
+        return 'Not yet updated';
+    }
+
+    const updatedAt = new Date(value);
+
+    if (Number.isNaN(updatedAt.getTime())) {
+        return value;
+    }
+
+    return new Intl.DateTimeFormat('en-US', {
+        month: 'numeric',
+        day: 'numeric',
+        year: 'numeric',
+    }).format(updatedAt);
+}
+
 function DetailItem({ label, value }: { label: string; value?: string | null }) {
     if (!hasValue(value)) {
         return null;
@@ -68,8 +98,30 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 export default function ResumeView({ resume }: ResumeViewProps) {
-    const downloadPdf = () => {
+    const { auth } = usePage<SharedData>().props;
+    const displayName = resume ? fullName(resume) : auth.user.name;
+
+    const printResume = () => {
         window.print();
+    };
+
+    const saveAsWord = () => {
+        const resumePaper = document.getElementById('resume-paper');
+
+        if (!resumePaper || !resume) {
+            return;
+        }
+
+        const documentContent = `<!doctype html><html><head><meta charset="utf-8"><title>${displayName} Resume</title></head><body>${resumePaper.outerHTML}</body></html>`;
+        const blob = new Blob(['\ufeff', documentContent], { type: 'application/msword' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${displayName.replace(/\s+/g, '-').toLowerCase()}-resume.doc`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     };
 
     return (
@@ -79,33 +131,87 @@ export default function ResumeView({ resume }: ResumeViewProps) {
             </Head>
 
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4 print:block print:bg-white print:p-0">
-                <div className="flex flex-col justify-between gap-4 rounded-xl border border-neutral-200 bg-white p-6 shadow-sm md:flex-row md:items-center dark:border-neutral-800 dark:bg-neutral-950 print:hidden">
-                    <div>
-                        <p className="text-sm font-medium text-purple-700 dark:text-purple-300">Resume preview</p>
-                        <h1 className="mt-1 text-2xl font-semibold text-neutral-950 dark:text-neutral-50">Review and download your resume</h1>
-                        <p className="mt-2 max-w-2xl text-sm text-neutral-600 dark:text-neutral-400">
-                            Use the download button to open your browser print dialog, then choose “Save as PDF”.
-                        </p>
-                    </div>
+                <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950 print:hidden">
+                    <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+                        <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+                            <Avatar className="h-32 w-32 border border-neutral-200 dark:border-neutral-800">
+                                <AvatarImage src={auth.user.avatar} alt={displayName} />
+                                <AvatarFallback className="bg-neutral-100 text-3xl font-semibold text-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
+                                    {initials(displayName)}
+                                </AvatarFallback>
+                            </Avatar>
 
-                    <div className="flex flex-wrap gap-3">
+                            <div className="space-y-5">
+                                <div>
+                                    <h1 className="text-2xl font-bold tracking-tight text-neutral-950 dark:text-neutral-50">{displayName}</h1>
+                                    <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-neutral-600 dark:text-neutral-300">
+                                        <span className="inline-flex items-center gap-2">
+                                            <Mail className="h-4 w-4" />
+                                            {resume?.email ?? auth.user.email}
+                                        </span>
+                                        {auth.user.email_verified_at && (
+                                            <span className="rounded-md bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">
+                                                Verified
+                                            </span>
+                                        )}
+                                        {hasValue(resume?.mobile_1) && (
+                                            <span className="inline-flex items-center gap-2">
+                                                <Phone className="h-4 w-4" />
+                                                {resume.mobile_1}
+                                            </span>
+                                        )}
+                                        {hasValue(resume?.current_address) && (
+                                            <span className="inline-flex items-center gap-2">
+                                                <MapPin className="h-4 w-4" />
+                                                {resume.current_address}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-wrap gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={saveAsWord}
+                                        disabled={!resume}
+                                        className="inline-flex items-center justify-center gap-2 rounded-md border border-neutral-300 bg-white px-3.5 py-2 text-sm font-medium text-neutral-950 shadow-sm transition hover:bg-neutral-50 disabled:pointer-events-none disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                                    >
+                                        <FileText className="h-4 w-4" />
+                                        Save as Word
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={printResume}
+                                        disabled={!resume}
+                                        className="inline-flex items-center justify-center gap-2 rounded-md border border-neutral-300 bg-white px-3.5 py-2 text-sm font-medium text-neutral-950 shadow-sm transition hover:bg-neutral-50 disabled:pointer-events-none disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                                    >
+                                        <Download className="h-4 w-4" />
+                                        Save as PDF
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={printResume}
+                                        disabled={!resume}
+                                        className="inline-flex items-center justify-center gap-2 rounded-md border border-neutral-300 bg-white px-3.5 py-2 text-sm font-medium text-neutral-950 shadow-sm transition hover:bg-neutral-50 disabled:pointer-events-none disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                                    >
+                                        <Printer className="h-4 w-4" />
+                                        Print
+                                    </button>
+                                </div>
+
+                                <p className="text-sm text-neutral-500 dark:text-neutral-400">Last updated: {formatUpdatedAt(resume?.updated_at)}</p>
+                            </div>
+                        </div>
+
                         <Link
-
-                            className="inline-flex items-center justify-center gap-2 rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-800 transition hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                            href="/dashboard/resume"
+                            className="inline-flex items-center justify-center gap-2 self-start rounded-md bg-blue-800 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-900"
                         >
-                            <FilePenLine className="h-4 w-4" />
-                            Edit resume
+                            <SquarePen className="h-4 w-4" />
+                            Edit Profile
                         </Link>
-
-                        <button
-                            type="button"
-                            onClick={downloadPdf}
-                            disabled={!resume}
-                            className="inline-flex items-center justify-center gap-2 rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-700 disabled:pointer-events-none disabled:opacity-50"
-                        >
-                            <Download className="h-4 w-4" />
-                            Download PDF
-                        </button>
                     </div>
                 </div>
 
@@ -116,7 +222,7 @@ export default function ResumeView({ resume }: ResumeViewProps) {
                             Create your resume first, then come back here to view and download it.
                         </p>
                         <Link
-
+                            href="/dashboard/resume"
                             className="mt-6 inline-flex items-center justify-center rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-700"
                         >
                             Create resume

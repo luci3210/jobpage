@@ -17,6 +17,13 @@ class SeekerResumeController extends Controller
         ]);
     }
 
+    public function show(): Response
+    {
+        return Inertia::render('seeker/resume-view', [
+            'resume' => auth()->user()->resume,
+        ]);
+    }
+
     public function store(StoreResumeRequest $request): RedirectResponse
     {
         $request->user()->resume()->updateOrCreate([], $request->validated());
